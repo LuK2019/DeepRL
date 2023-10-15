@@ -80,7 +80,7 @@ class DQNAgent(nn.Module):
                 next_q_values = next_qa_values.max(dim=1)[0]
 
             
-            target_values = reward + (1.0 - done) * self.discount * next_q_values
+            target_values = reward + (~done) * self.discount * next_q_values
 
         # TODO(student): train the critic with the target values
         qa_values = self.critic(obs)
