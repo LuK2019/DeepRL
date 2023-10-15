@@ -48,7 +48,12 @@ class DQNAgent(nn.Module):
         observation = ptu.from_numpy(np.asarray(observation))[None]
 
         # TODO(student): get the action from the critic using an epsilon-greedy strategy
-        action = ...
+        q_values = self.critic(observation)
+
+        if np.random.rand() < epsilon:
+            action = torch.randint(0, self.num_actions, size=(1,))
+        else:
+            action = q_values.argmax(dim=1)
 
         return ptu.to_numpy(action).squeeze(0).item()
 
@@ -66,20 +71,21 @@ class DQNAgent(nn.Module):
         # Compute target values
         with torch.no_grad():
             # TODO(student): compute target values
-            next_qa_values = ...
+            next_qa_values = self.target_critic(next_obs)
 
             if self.use_double_q:
-                raise NotImplementedError
+                best_actions = self.critic(next_obs).argmax(dim=1)
+                next_q_values = next_qa_values.gather(1, best_actions.unsqueeze(-1)).squeeze(-1)
             else:
-                next_action = ...
+                next_q_values = next_qa_values.max(dim=1)[0]
+
             
-            next_q_values = ...
-            target_values = ...
+            target_values = reward + (1.0 - done) * self.discount * next_q_values
 
         # TODO(student): train the critic with the target values
-        qa_values = ...
-        q_values = ... # Compute from the data actions; see torch.gather
-        loss = ...
+        qa_values = self.critic(obs)
+        q_values = qa_values.gather(1, action.unsqueeze(-1)).squeeze(-1)
+        loss = self.critic_loss(q_values, target_values)
 
 
         self.critic_optimizer.zero_grad()
@@ -113,6 +119,9 @@ class DQNAgent(nn.Module):
         """
         Update the DQN agent, including both the critic and target.
         """
-        # TODO(student): update the critic, and the target if needed
+        critic_stats = self.update_critic(obs, action, reward, next_obs, done)
+
+        if step % self.target_update_period == 0:
+            self.update_target_critic()
 
         return critic_stats
