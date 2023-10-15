@@ -1,9 +1,10 @@
 import time
 import argparse
 import os
+os.chdir("/home/luke/Projects/.DeepRL/DeepRL/hw3/cs285")
 print(os.getcwd())
 
-from cs285_current.agents.dqn_agent import DQNAgent
+from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs
 
 import os
