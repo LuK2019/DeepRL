@@ -1,9 +1,12 @@
 import time
 import argparse
+import sys
 import os
-print(os.getcwd())
 
-from cs285_current.agents.dqn_agent import DQNAgent
+
+for path in sys.path:
+    print(path)
+from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs
 
 import os
@@ -141,7 +144,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
             batch = ptu.from_numpy(batch)
 
             # TODO(student): Train the agent. `batch` is a dictionary of numpy arrays,
-            update_info = agent.update(**batch)
+            update_info = agent.update(obs=batch["observations"], action=batch["actions"], reward=batch["rewards"], next_obs=batch["next_observations"], done=batch["dones"], step=step)
 
             # Logging code
             update_info["epsilon"] = epsilon
@@ -194,7 +197,7 @@ def run_training_loop(config: dict, logger: Logger, args: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_file", "-cfg", type=str, required=True)
+    parser.add_argument("--config_file", "-cfg", default="experiments/dqn/cartpole.yaml", type=str)
 
     parser.add_argument("--eval_interval", "-ei", type=int, default=10000)
     parser.add_argument("--num_eval_trajectories", "-neval", type=int, default=10)
