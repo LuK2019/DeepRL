@@ -74,8 +74,8 @@ class DQNAgent(nn.Module):
             next_qa_values = self.target_critic(next_obs)
 
             if self.use_double_q:
-                best_actions = self.critic(next_obs).argmax(dim=1)
-                next_q_values = next_qa_values.gather(1, best_actions.unsqueeze(-1)).squeeze(-1)
+                best_actions_indices = self.critic(next_obs).argmax(dim=1).unsqueeze(-1)
+                next_q_values = next_qa_values.gather(1, best_actions_indices).squeeze()
             else:
                 next_q_values = next_qa_values.max(dim=1)[0]
 
