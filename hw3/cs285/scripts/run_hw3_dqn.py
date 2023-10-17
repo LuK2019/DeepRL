@@ -3,9 +3,8 @@ import argparse
 import sys
 import os
 
-
-for path in sys.path:
-    print(path)
+os.chdir("/home/luke/Projects/.DeepRL/DeepRL/hw3/cs285")
+print(os.getcwd())
 from cs285.agents.dqn_agent import DQNAgent
 import cs285.env_configs
 
