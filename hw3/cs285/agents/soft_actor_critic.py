@@ -149,9 +149,10 @@ class SoftActorCritic(nn.Module):
 
         # TODO(student): Implement the different backup strategies.
         if self.target_critic_backup_type == "doubleq":
-            raise NotImplementedError
+            next_qs_swapped = torch.cat((next_qs[1:, :], next_qs[0:1, :]), dim=0)
+            next_qs = next_qs_swapped
         elif self.target_critic_backup_type == "min":
-            raise NotImplementedError
+            next_qs = torch.min(next_qs, dim=0)[0]
         else:
             # Default, we don't need to do anything.
             pass
@@ -210,7 +211,6 @@ class SoftActorCritic(nn.Module):
 
             # Compute the target Q-value
             target_values = reward + (1 - done) * self.discount * next_qs
-            next_qs = self.q_backup_strategy(next_qs)
 
             assert next_qs.shape == (
                 self.num_critic_networks,
@@ -301,16 +301,16 @@ class SoftActorCritic(nn.Module):
         batch_size = obs.shape[0]
 
         # Sample from the actor
-        action_distribution: torch.distributions.Distribution = self.actor(obs)
+        obs = ptu.from_numpy(obs)
+        action_distribution = self.actor(obs)
 
         # TODO(student): Sample actions
-        action_distribution = self.actor(obs)
         action = action_distribution.rsample()
         q_values = self.critic(obs, action)
         log_probs = action_distribution.log_prob(action)
         loss = -torch.mean(q_values - self.temperature * log_probs)
 
-        return loss, torch.mean(self.entropy(action_distribution))
+        return loss, self.entropy(action_distribution)
 
     def update_actor(self, obs: torch.Tensor):
         """
