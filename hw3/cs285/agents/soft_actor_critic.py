@@ -224,6 +224,13 @@ class SoftActorCritic(nn.Module):
                 next_action_entropy = ptu.to_numpy(next_action_entropy)
                 next_qs += self.temperature * next_action_entropy
 
+            # Compute the target Q-value
+            target_values: torch.Tensor = ...
+            assert target_values.shape == (
+                self.num_critic_networks,
+                batch_size
+            )
+
         # TODO(student): Update the critic
         # Predict Q-values
         #action to tensor
